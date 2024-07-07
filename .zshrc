@@ -30,16 +30,10 @@ function nginxcreate() {
     nginxrestart
 
     sudo ln -s /etc/nginx/sites-available/$1 /etc/nginx/sites-enabled/$1
-
-    nginxedit $1
  }
 
  function nginxmkcert() {
     mkcert -key-file $1.key -cert-file $1.crt $1 "*.$1" localhost 127.0.0.1 ::1
     sudo chmod 644 $1.key && sudo chmod 644 $1.crt
     sudo mv $1.key /etc/ssl/certs && sudo mv $1.crt /etc/ssl/certs
- }
-
- function nginxedit() {
-     sudo gedit /etc/nginx/sites-available/$1.conf
  }
