@@ -1,3 +1,4 @@
+### Code to ~/.zshrc
 ### code ~/.zshrc
 
 
@@ -6,49 +7,36 @@ alias nginxrestart="sudo nginx -s stop && sudo nginx"
 alias nginxa ="ls -la /etc/nginx/sites-available/"
 alias nginxe ="ls -la /etc/nginx/sites-enabled/"
 
+### create site folder
+### nginxcreate test.test  (if site in ~/www/test.test)
+### nginxcreate laravel.test /... full path to .../laravel.test/public
 function nginxcreate() {
-    wget https://raw.githubusercontent.com/klassev/macos-brew-vhosts/master/nginx-vserver-m1.conf -O /opt/homebrew/etc/nginx/servers/$1.conf
+    sudo wget https://raw.githubusercontent.com/klassev/linux-nginx-vhost/main/nginx-vserver-linux.conf -O /etc/nginx/sites-available/$1
     
-    sed -i '' "s:{{host}}:$1:" /opt/homebrew/etc/nginx/servers/$1.conf
+    sudo sed -i '' "s:{{host}}:$1:" /etc/nginx/sites-available/$1
 
     if [ "$2" ]; then
-        sed  -i '' "s:{{root}}:$2:" /opt/homebrew/etc/nginx/servers/$1.conf
+        sudo sed  -i '' "s:{{root}}:$2:" /etc/nginx/sites-available/$1
     else
-        sed  -i '' "s:{{root}}:$HOME/Sites/$1:" /opt/homebrew/etc/nginx/servers/$1.conf
+        sudo sed  -i '' "s:{{root}}:$HOME/www/$1:" /etc/nginx/sites-available/$1
     fi
 
-    #nginxaddssl $1
 
     nginxmkcert $1
 
     nginxrestart
 
-    code /opt/homebrew/etc/nginx/servers/$1.conf
- }
+    sudo ln -s /etc/nginx/sites-available/$1 /etc/nginx/sites-enabled/$1
 
- function nginxaddssl() {
-     openssl req \
-        -x509 -sha256 -nodes -newkey rsa:2048 -days 3650 \
-        -subj "/CN=$1" \
-        -reqexts SAN \
-        -extensions SAN \
-        -config <(cat /System/Library/OpenSSL/openssl.cnf; printf "[SAN]\nsubjectAltName=DNS:$1") \
-        -keyout /opt/homebrew/etc/nginx/ssl/$1.key \
-        -out /opt/homebrew/etc/nginx/ssl/$1.crt
-
-    sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain /opt/homebrew/etc/nginx/ssl/$1.crt
+    nginxedit $1
  }
 
  function nginxmkcert() {
     mkcert -key-file $1.key -cert-file $1.crt $1 "*.$1" localhost 127.0.0.1 ::1
     sudo chmod 644 $1.key && sudo chmod 644 $1.crt
-    mv $1.key /opt/homebrew/etc/nginx/ssl && mv $1.crt /opt/homebrew/etc/nginx/ssl
+    mv $1.key /etc/ssl/certs && mv $1.crt /etc/ssl/certs
  }
 
  function nginxedit() {
-     code /opt/homebrew/etc/nginx/servers/$1
- }
-
- function nginxlist() {
-     ll /opt/homebrew/etc/nginx/servers/
+     sudo nano /etc/nginx/sites-available/$1.conf
  }
