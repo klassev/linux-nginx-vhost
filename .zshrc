@@ -2,14 +2,14 @@
 ### code ~/.zshrc
 
 
-alias nginxreload="sudo nginx -s reload"
-alias nginxrestart="sudo nginx -s stop && sudo nginx"
+alias nginxreload="sudo service nginx reload"
+alias nginxrestart="sudo service nginx restart"
 alias nginxa="ls -la /etc/nginx/sites-available/"
 alias nginxe="ls -la /etc/nginx/sites-enabled/"
 
 ### create site folder
 ### nginxcreate test.test  (if site in ~/www/test.test)
-### nginxcreate laravel.test /... full path to .../laravel.test/public
+### nginxcreate laravel.test public (if site in ~/www/test.test/public)
 function nginxcreate() {
 
     sudo sh -c "echo '127.0.0.1 $1 www.$1' >> /etc/hosts"
@@ -19,17 +19,16 @@ function nginxcreate() {
     sudo sed -i "s:{{host}}:$1:" /etc/nginx/sites-available/$1
 
     if [ "$2" ]; then
-        sudo sed -i "s:{{root}}:$2:" /etc/nginx/sites-available/$1
+        sudo sed -i "s:{{root}}:$HOME/www/$1/$2:" /etc/nginx/sites-available/$1
     else
         sudo sed -i "s:{{root}}:$HOME/www/$1:" /etc/nginx/sites-available/$1
     fi
 
-
     nginxmkcert $1
 
-    nginxrestart
-
     sudo ln -s /etc/nginx/sites-available/$1 /etc/nginx/sites-enabled/$1
+
+    nginxreload
  }
 
  function nginxmkcert() {
