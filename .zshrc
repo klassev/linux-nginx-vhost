@@ -34,5 +34,5 @@ function nginxcreate() {
  function nginxmkcert() {
     mkcert -key-file $1.key -cert-file $1.crt $1 "*.$1" localhost 127.0.0.1 ::1
     sudo chmod 644 $1.key && sudo chmod 644 $1.crt
-    sudo mv $1.key /etc/ssl/certs && sudo mv $1.crt /etc/ssl/certs
+    sudo mv $1.key /etc/ssl/private && sudo mv $1.crt /etc/ssl/certs
  }
